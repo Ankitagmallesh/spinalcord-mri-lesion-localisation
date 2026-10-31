@@ -139,12 +139,21 @@ export default function UploadZone({ onFile, onSampleSelect, loading, classes = 
             </div>
 
             {/* Pipeline Step Footnote */}
-            <div className="mx-4 my-3 flex items-center justify-between rounded-xl border border-white/10 bg-black/30 px-3.5 py-2 text-xs text-zinc-400">
-                <span className="flex items-center gap-1.5 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                    Preprocessing: CLAHE + Rescale
-                </span>
-                <span className="font-mono text-[10px] text-zinc-300">256×256 px</span>
+            <div className="mx-4 my-3 flex flex-col gap-1.5 rounded-xl border border-white/10 bg-black/30 px-3.5 py-2.5 text-xs text-zinc-400">
+                <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-[11px] text-zinc-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                        Pipeline: CLAHE + U-Net + Grad-CAM
+                    </span>
+                    <span className="font-mono text-[10px] text-zinc-400">256×256 px</span>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-emerald-400/90 border-t border-white/5 pt-1.5 font-mono">
+                    <span className="flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-400" />
+                        Spinal Cord Verifier: Active
+                    </span>
+                    <span className="text-zinc-400">Rejects Non-Spine Scans</span>
+                </div>
             </div>
         </div>
     );

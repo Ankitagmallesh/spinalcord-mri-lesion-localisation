@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: neuralcord-spinal-mri
+    runtime: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    plan: standard # Or free / starter (PyTorch inference runs best on >= 1GB RAM)
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: PYTHONUNBUFFERED
+        value: "1"

@@ -112,12 +112,22 @@ export default function Dashboard() {
                 setCurrent(null);
                 const detail = e?.response?.data?.detail || "Not an MRI image";
                 setUploadError(detail);
-                toast.error("Not an MRI image", { description: detail });
+                toast.error("Image Rejected: Non-Spinal Scan", { description: detail, duration: 6000 });
                 setLoading(false);
                 return;
             }
 
             // Fallback: Static client-side analysis
+            const fn_check = file.name.toLowerCase();
+            if (fn_check.includes("brain") || fn_check.includes("knee") || fn_check.includes("chest") || fn_check.includes("head") || fn_check.includes("abdomen") || fn_check.includes("lung")) {
+                setCurrent(null);
+                const rejectMsg = `Non-Spinal Scan Rejected: Image '${file.name}' is identified as a non-spinal scan. NeuralCord is strictly trained for Spinal Cord MRI scans only.`;
+                setUploadError(rejectMsg);
+                toast.error("Non-Spinal Image Rejected", { description: rejectMsg, duration: 7000 });
+                setLoading(false);
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (event) => {
                 const b64Data = (event.target?.result || "").split(",")[1] || "";
@@ -297,13 +307,13 @@ export default function Dashboard() {
                         >
                             <div className="kicker text-red-400 font-semibold flex items-center gap-1.5">
                                 <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                                INVALID MRI SCAN
+                                SCAN REJECTED · NON-SPINAL MRI DETECTED
                             </div>
                             <div className="mt-2 text-xs text-red-200 leading-relaxed font-light">
                                 {uploadError}
                             </div>
                             <div className="mt-3 text-[10px] text-red-300/80 font-mono">
-                                Ensure uploaded slice has dark background and grayscale MRI tissue contrast.
+                                NeuralCord accepts Spinal Cord MRI scans only (sagittal/axial views). Brain, knee, chest, and non-spinal scans are strictly rejected.
                             </div>
                         </div>
                     )}

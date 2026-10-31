@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  neuralcord-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: neuralcord-diagnostic-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - CORS_ORIGINS=*
+      - MONGO_URL=mongodb://mongo:27017
+      - DB_NAME=neuralcord_db
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6-jammy
+    container_name: neuralcord-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:

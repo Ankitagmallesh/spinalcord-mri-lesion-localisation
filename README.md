@@ -4,47 +4,53 @@
 ![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)
-![GPT-4 Vision](https://img.shields.io/badge/OpenAI-GPT--4o--Vision-412991.svg?style=flat&logo=openai&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C.svg?style=flat&logo=pytorch&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=docker&logoColor=white)
 
-NeuralCord is a comprehensive AI-powered diagnostic pipeline for Spinal Cord MRI classification. It accurately predicts four class labels: **Tumor, MS Lesions, Injury, and Normal**. 
+NeuralCord is an end-to-end AI-powered diagnostic and segmentation platform for Spinal Cord MRI scans. It predicts 4 clinical disease categories: **Tumor, MS Lesions, Injury, and Normal**, providing full **Grad-CAM & SHAP** explainability, localized lesion discovery, and automatic spinal cord segmentation.
 
-By leveraging classical Computer Vision alongside **GPT-4o Vision LLMs**, NeuralCord resolves complex edge cases (e.g., distinguishing broken cord structures in tumors from MS lesions), delivering highly accurate predictions along with explicitly stated radiological rationale.
+---
 
-## 🚀 Features
+## 🛡️ Non-Spinal Cord Image Verification & Rejection (New)
 
-- **4-Class Prediction:** High-accuracy classification of MR images into Tumor, MS Lesions, Injury, or Normal.
-- **Multimodal AI Architecture:** 
-  - **Vision LLM:** GPT-4o Vision directly analyzes the MRI image to output a structured prediction, confidence score, and detailed clinical reasoning.
-  - **Classical CV:** Computes segmentation masks, extracts the spinal cord, and overlays anomaly highlights for visual validation.
-- **Premium Medical UI:** A sleek, dark "glassmorphism" React dashboard featuring:
-  - Drag-and-drop MRI image upload
-  - 4-Panel viewer (Original, Segmented Cord, Binary Mask, Disease Overlay)
-  - Real-time classification card with diagnostic rationale
-  - Interactive prediction history and metrics visualization
-- **Persistent Database:** MongoDB-backed history allows you to revisit past predictions.
+NeuralCord includes an automated **Spinal Cord Verifier** trained to detect and reject non-spinal cord MR images (such as **Brain MRI**, **Knee / Musculoskeletal MRI**, **Chest / Abdominal CT**, and non-medical images).
 
-## 🛠️ Technology Stack
+### How It Works:
+- **`SpinalCordVerifierNet` (Deep CNN)**: Multi-class convolutional neural network with Squeeze-and-Excitation channel attention.
+- **`AnatomicalSpineDetector` (Medical CV Priors)**:
+  - **Columnar Continuity**: Verifies continuous longitudinal spinal canal across the sagittal axis.
+  - **Cranial Vault & Ventricle Detection**: Identifies circular skull envelopes, bilateral cerebral symmetry, and lateral ventricles characteristic of Brain MRI.
+  - **Articular Joint Detector**: Identifies condylar bone gaps characteristic of Knee MRI.
+  - **U-Net Cord Plausibility Check**: Verifies that the U-Net produces a valid anatomical cord contour.
+- If a non-spinal scan is uploaded, inference halts with `HTTP 422 Unprocessable Entity` and displays a detailed rejection alert with clinical rationale.
 
-- **Frontend:** React, Vanilla CSS (Premium Dark UI), Lucide Icons
-- **Backend:** FastAPI, Python, OpenCV (Image Processing)
-- **AI/ML:** GPT-4o Vision API (via `emergentintegrations`), PyTorch (U-Net Architecture Reference)
-- **Database:** MongoDB
+---
 
-## 📦 Installation & Setup
+## 🚀 1-Click Deployment
 
-### Prerequisites
-- Node.js (v18+)
-- Python (3.9+)
-- MongoDB (Running locally or via Atlas)
-- emergentintegrations / OpenAI API Key
+### Option A: Cloud Deployment (Render / Hugging Face Spaces / Railway)
+- **Hugging Face Spaces (Free 16GB RAM + 2 vCPUs)**:
+  1. Create a new Space at [huggingface.co/spaces](https://huggingface.co/spaces).
+  2. Select **Docker** SDK (Blank template).
+  3. Push this repository to your Space. The included multi-stage `Dockerfile` automatically builds both the React dashboard and the FastAPI PyTorch backend.
+- **Render.com**:
+  1. Create a new **Web Service** from your GitHub repo.
+  2. Select **Docker** (it automatically uses `Dockerfile` and `render.yaml`).
+  3. Deploy!
 
-### 1. Clone the repository
+### Option B: Local Docker Compose
 ```bash
-git clone https://github.com/Ankitagmallesh/spinal-mri-disease-detection.git
-cd spinal-mri-disease-detection
+docker compose up --build
 ```
+Navigate to `http://localhost:8000` to access the full application.
 
-### 2. Backend Setup
+For detailed deployment options (Vercel, Railway, native Windows/Linux), see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+---
+
+## 🛠️ Local Development Setup
+
+### 1. Backend Setup
 ```bash
 cd app/app/backend
 python -m venv venv
@@ -54,41 +60,33 @@ venv\Scripts\activate
 # Linux/macOS
 source venv/bin/activate
 
+# Install PyTorch CPU and backend dependencies
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
-
-# Create a .env file and add your keys
-echo "EMERGENT_LLM_KEY=your_api_key_here" > .env
-echo "MONGO_URI=mongodb://localhost:27017" >> .env
 
 # Run the FastAPI server
 uvicorn server:app --reload --port 8000
 ```
 
-### 3. Frontend Setup
-Open a new terminal window:
+### 2. Frontend Setup
 ```bash
 cd app/app/frontend
-npm install
-
-# Start the React development server
-npm run dev
+npm install --legacy-peer-deps
+npm start
 ```
+The React frontend will be live at `http://localhost:3000`.
 
-The frontend will be available at `http://localhost:3000` (or `http://localhost:5173` depending on the bundler).
+---
 
-## 🧠 Architecture Overview
+## 🧠 Diagnostic Pipeline
 
-1. **Upload & Preprocessing:** User uploads an MRI slice. The backend applies CLAHE (Contrast Limited Adaptive Histogram Equalization) and classical thresholding to extract the cord mask.
-2. **Vision LLM Inference:** The raw image is base64-encoded and passed to the GPT-4o Vision model along with a strict radiological prompt.
-3. **Reasoning & Classification:** The model evaluates the image, disambiguates edge cases (like broken parts in tumors), and returns a JSON payload with probabilities and clinical rationale.
-4. **Presentation:** The frontend renders the 4-panel visualizer and displays the model's reasoning in a premium, high-contrast dashboard.
+1. **Upload & Verification:** User uploads an MRI slice. The dual-layer verifier validates that the scan is a genuine Spinal Cord MRI and rejects Brain, Knee, and non-spinal scans.
+2. **Preprocessing:** Contrast Limited Adaptive Histogram Equalization (CLAHE) and grayscale tensor normalization.
+3. **U-Net Cord Segmentation:** Deep neural segmentation predicts the exact spinal cord column mask.
+4. **Lesion Localization:** Segmented cord is scanned for hyperintense plaques (MS), focal expansive masses (Tumor), or cord deformation (Injury).
+5. **Explainability & Classification:** Dual Grad-CAM and SHAP attribution overlays confirm radiological rationale.
 
-## 🔜 Roadmap
-- **P1:** NIfTI (`.nii`/`.nii.gz`) volume support with interactive slice picker.
-- **P1:** Download-as-PDF radiology report generation.
-- **P2:** Per-user authentication and private prediction history.
-- **P2:** Swap in a fully trained offline PyTorch U-Net checkpoint.
-- **P3:** Batch upload mode.
+---
 
 ## 📄 License
 This project is licensed under the MIT License.

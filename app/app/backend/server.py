@@ -39,6 +39,7 @@ from model import UNetWithClassifier, AttentionUNetWithClassifier, NeuroCordResA
 from data_loader import SpinalCordMRIDataset
 from utils import dice_coefficient, iou_score
 from xai import GradCAM, generate_gradcam_overlay, compute_shap_attribution
+from spine_verifier import get_verifier
 
 import json
 ROOT_DIR = Path(__file__).parent
@@ -102,10 +103,8 @@ if model_path.exists():
     except Exception as e:
         print(f"Failed to load PyTorch model: {e}")
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+cors_env = os.environ.get("CORS_ORIGINS", "*")
+origins = ["*"] if cors_env == "*" else [o.strip() for o in cors_env.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -809,6 +808,23 @@ async def predict(file: UploadFile = File(...), actual_class: Optional[str] = Fo
     # Step 2: Preprocessing (Grayscale, CLAHE Contrast Enhancement, Normalization)
     gray = preprocess_image(contents)
 
+    # Step 1.5: Strict Spinal Cord Verification (Rejects Non-Spinal MR Images, Brain, Knee, etc.)
+    verifier = get_verifier()
+    is_spine, detected_category, verifier_conf, verifier_reason, _ = verifier.verify(gray)
+    if not is_spine:
+        logger.warning(
+            "Non-spinal MRI rejected. Detected: %s (Confidence: %.1f%%). Reason: %s",
+            detected_category, verifier_conf, verifier_reason
+        )
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Non-Spinal Scan Rejected: {verifier_reason} "
+                f"(Detected: {detected_category}, Confidence: {verifier_conf:.1f}%). "
+                "NeuralCord is strictly calibrated for Spinal Cord MRI scans. Please upload a sagittal or axial spinal cord scan."
+            ),
+        )
+
     # Step 3: Trained U-Net Inference & Step 4: Spinal Cord Segmentation
     if ML_MODEL is not None:
         img_t = torch.from_numpy(gray.astype(np.float32) / 255.0).unsqueeze(0).unsqueeze(0).to(DEVICE)
@@ -825,6 +841,11 @@ async def predict(file: UploadFile = File(...), actual_class: Optional[str] = Fo
             cord_mask = cv2.morphologyEx(unet_mask, cv2.MORPH_CLOSE, k, iterations=2)
         else:
             cord_mask = segment_spinal_cord(gray)
+            if cord_mask.sum() < 120:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Segmentation Rejected: No coherent spinal cord anatomy detected in this scan. Please verify your spinal MRI slice.",
+                )
 
         # Compute segmentation confidence metrics from U-Net output
         cord_bin = (cord_mask > 0).astype(np.float32)
@@ -1289,3 +1310,20 @@ async def get_sample_mri_file(class_name: str, filename: str):
 
 
 app.include_router(api_router)
+
+# Mount React static build if present for unified single-container cloud deployment
+FRONTEND_BUILD = ROOT_DIR.parent / "frontend" / "build"
+if FRONTEND_BUILD.exists() and (FRONTEND_BUILD / "index.html").exists():
+    from fastapi.staticfiles import StaticFiles
+    if (FRONTEND_BUILD / "static").exists():
+        app.mount("/static", StaticFiles(directory=str(FRONTEND_BUILD / "static")), name="static")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa_frontend(full_path: str):
+        if full_path.startswith("api"):
+            raise HTTPException(status_code=404, detail="API route not found")
+        target = FRONTEND_BUILD / full_path
+        if target.is_file():
+            return FileResponse(target)
+        return FileResponse(FRONTEND_BUILD / "index.html")
+
