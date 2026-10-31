@@ -778,14 +778,20 @@ def make_segmented(gray: np.ndarray, cord_mask: np.ndarray) -> np.ndarray:
 # ---------------------------------------------------------------------------
 
 
+FRONTEND_BUILD = ROOT_DIR.parent / "frontend" / "build"
+
 @app.get("/")
 async def root():
+    # If React frontend was built into container, serve it directly at root
+    if FRONTEND_BUILD.exists() and (FRONTEND_BUILD / "index.html").exists():
+        return FileResponse(FRONTEND_BUILD / "index.html")
     return {
         "message": "Spinal Cord MRI Diagnostics API",
         "version": "2.0",
-        "pipeline": "MRI Image -> Preprocessing -> Trained U-Net -> Spinal Cord Segmentation -> Lesion Localization -> Classification -> Result",
-        "models_available": ["Standard U-Net", "Attention U-Net", "NeuroCord-ResAttnNet (Proposed)"],
+        "status": "online",
         "api_root": "/api/",
+        "docs": "/docs",
+        "frontend_note": "Frontend build not detected in backend container. Deploy frontend on Vercel or build via Docker.",
     }
 
 
@@ -1321,7 +1327,6 @@ async def get_sample_mri_file(class_name: str, filename: str):
 app.include_router(api_router)
 
 # Mount React static build if present for unified single-container cloud deployment
-FRONTEND_BUILD = ROOT_DIR.parent / "frontend" / "build"
 if FRONTEND_BUILD.exists() and (FRONTEND_BUILD / "index.html").exists():
     from fastapi.staticfiles import StaticFiles
     if (FRONTEND_BUILD / "static").exists():
