@@ -4,7 +4,7 @@ services:
     runtime: docker
     dockerfilePath: Dockerfile
     dockerContext: .
-    plan: standard # Or free / starter (PyTorch inference runs best on >= 1GB RAM)
+    plan: free
     region: oregon
     envVars:
       - key: PORT

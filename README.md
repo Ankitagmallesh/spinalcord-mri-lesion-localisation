@@ -1,3 +1,13 @@
+---
+title: NeuralCord Spinal Cord MRI Diagnostics
+emoji: 🩺
+colorFrom: cyan
+colorTo: blue
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # NeuralCord — Spinal Cord MRI Diagnostic Pipeline
 
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
