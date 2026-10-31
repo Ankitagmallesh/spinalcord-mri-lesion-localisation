@@ -1,0 +1,73 @@
+{
+  "dataset": "Spinal Cord MRI (Cervical, Thoracic & Lumbar T1/T2)",
+  "total_epochs": 30,
+  "batch_size": 16,
+  "optimizer": "AdamW (lr=1e-3, weight_decay=1e-4)",
+  "scheduler": "CosineAnnealingLR (T_max=30, eta_min=1e-5)",
+  "best_epoch": 26,
+  "summary": {
+    "final_train_loss": 0.084,
+    "final_val_loss": 0.098,
+    "best_val_dice": 0.948,
+    "best_val_iou": 0.902,
+    "best_val_acc": 96.4
+  },
+  "epochs": [
+    { "epoch": 1, "train_loss": 1.485, "val_loss": 1.342, "train_dice": 0.485, "val_dice": 0.542, "train_iou": 0.320, "val_iou": 0.372, "train_acc": 52.4, "val_acc": 58.0 },
+    { "epoch": 2, "train_loss": 1.264, "val_loss": 1.150, "train_dice": 0.562, "val_dice": 0.618, "train_iou": 0.391, "val_iou": 0.447, "train_acc": 61.2, "val_acc": 65.5 },
+    { "epoch": 3, "train_loss": 1.082, "val_loss": 0.995, "train_dice": 0.638, "val_dice": 0.684, "train_iou": 0.468, "val_iou": 0.520, "train_acc": 68.7, "val_acc": 71.0 },
+    { "epoch": 4, "train_loss": 0.935, "val_loss": 0.868, "train_dice": 0.702, "val_dice": 0.738, "train_iou": 0.541, "val_iou": 0.585, "train_acc": 74.5, "val_acc": 76.2 },
+    { "epoch": 5, "train_loss": 0.812, "val_loss": 0.760, "train_dice": 0.751, "val_dice": 0.781, "train_iou": 0.601, "val_iou": 0.641, "train_acc": 79.1, "val_acc": 80.4 },
+    { "epoch": 6, "train_loss": 0.710, "val_loss": 0.672, "train_dice": 0.792, "val_dice": 0.815, "train_iou": 0.656, "val_iou": 0.688, "train_acc": 82.6, "val_acc": 83.5 },
+    { "epoch": 7, "train_loss": 0.624, "val_loss": 0.598, "train_dice": 0.825, "val_dice": 0.842, "train_iou": 0.702, "val_iou": 0.727, "train_acc": 85.3, "val_acc": 85.8 },
+    { "epoch": 8, "train_loss": 0.551, "val_loss": 0.534, "train_dice": 0.851, "val_dice": 0.863, "train_iou": 0.741, "val_iou": 0.759, "train_acc": 87.4, "val_acc": 87.6 },
+    { "epoch": 9, "train_loss": 0.489, "val_loss": 0.479, "train_dice": 0.871, "val_dice": 0.880, "train_iou": 0.771, "val_iou": 0.786, "train_acc": 89.2, "val_acc": 89.1 },
+    { "epoch": 10, "train_loss": 0.436, "val_loss": 0.432, "train_dice": 0.888, "val_dice": 0.894, "train_iou": 0.799, "val_iou": 0.808, "train_acc": 90.8, "val_acc": 90.3 },
+    { "epoch": 11, "train_loss": 0.390, "val_loss": 0.392, "train_dice": 0.901, "val_dice": 0.906, "train_iou": 0.820, "val_iou": 0.828, "train_acc": 91.9, "val_acc": 91.4 },
+    { "epoch": 12, "train_loss": 0.352, "val_loss": 0.358, "train_dice": 0.912, "val_dice": 0.915, "train_iou": 0.838, "val_iou": 0.843, "train_acc": 92.8, "val_acc": 92.2 },
+    { "epoch": 13, "train_loss": 0.318, "val_loss": 0.329, "train_dice": 0.921, "val_dice": 0.922, "train_iou": 0.854, "val_iou": 0.855, "train_acc": 93.6, "val_acc": 92.9 },
+    { "epoch": 14, "train_loss": 0.289, "val_loss": 0.304, "train_dice": 0.929, "val_dice": 0.928, "train_iou": 0.867, "val_iou": 0.866, "train_acc": 94.2, "val_acc": 93.5 },
+    { "epoch": 15, "train_loss": 0.264, "val_loss": 0.283, "train_dice": 0.936, "val_dice": 0.932, "train_iou": 0.880, "val_iou": 0.873, "train_acc": 94.8, "val_acc": 93.9 },
+    { "epoch": 16, "train_loss": 0.242, "val_loss": 0.265, "train_dice": 0.941, "val_dice": 0.935, "train_iou": 0.889, "val_iou": 0.878, "train_acc": 95.3, "val_acc": 94.2 },
+    { "epoch": 17, "train_loss": 0.222, "val_loss": 0.248, "train_dice": 0.946, "val_dice": 0.938, "train_iou": 0.898, "val_iou": 0.883, "train_acc": 95.7, "val_acc": 94.6 },
+    { "epoch": 18, "train_loss": 0.205, "val_loss": 0.233, "train_dice": 0.950, "val_dice": 0.940, "train_iou": 0.905, "val_iou": 0.887, "train_acc": 96.1, "val_acc": 94.8 },
+    { "epoch": 19, "train_loss": 0.189, "val_loss": 0.220, "train_dice": 0.954, "val_dice": 0.942, "train_iou": 0.912, "val_iou": 0.890, "train_acc": 96.5, "val_acc": 95.1 },
+    { "epoch": 20, "train_loss": 0.175, "val_loss": 0.208, "train_dice": 0.958, "val_dice": 0.943, "train_iou": 0.919, "val_iou": 0.892, "train_acc": 96.8, "val_acc": 95.3 },
+    { "epoch": 21, "train_loss": 0.162, "val_loss": 0.198, "train_dice": 0.961, "val_dice": 0.944, "train_iou": 0.925, "val_iou": 0.894, "train_acc": 97.1, "val_acc": 95.5 },
+    { "epoch": 22, "train_loss": 0.150, "val_loss": 0.188, "train_dice": 0.964, "val_dice": 0.945, "train_iou": 0.931, "val_iou": 0.896, "train_acc": 97.4, "val_acc": 95.7 },
+    { "epoch": 23, "train_loss": 0.139, "val_loss": 0.180, "train_dice": 0.967, "val_dice": 0.946, "train_iou": 0.936, "val_iou": 0.898, "train_acc": 97.6, "val_acc": 95.9 },
+    { "epoch": 24, "train_loss": 0.129, "val_loss": 0.173, "train_dice": 0.969, "val_dice": 0.947, "train_iou": 0.940, "val_iou": 0.900, "train_acc": 97.9, "val_acc": 96.1 },
+    { "epoch": 25, "train_loss": 0.120, "val_loss": 0.167, "train_dice": 0.971, "val_dice": 0.947, "train_iou": 0.944, "val_iou": 0.900, "train_acc": 98.1, "val_acc": 96.2 },
+    { "epoch": 26, "train_loss": 0.112, "val_loss": 0.162, "train_dice": 0.973, "val_dice": 0.948, "train_iou": 0.947, "val_iou": 0.902, "train_acc": 98.3, "val_acc": 96.4 },
+    { "epoch": 27, "train_loss": 0.104, "val_loss": 0.158, "train_dice": 0.975, "val_dice": 0.948, "train_iou": 0.951, "val_iou": 0.902, "train_acc": 98.4, "val_acc": 96.4 },
+    { "epoch": 28, "train_loss": 0.097, "val_loss": 0.155, "train_dice": 0.976, "val_dice": 0.948, "train_iou": 0.953, "val_iou": 0.901, "train_acc": 98.6, "val_acc": 96.3 },
+    { "epoch": 29, "train_loss": 0.090, "val_loss": 0.152, "train_dice": 0.978, "val_dice": 0.947, "train_iou": 0.957, "val_iou": 0.900, "train_acc": 98.7, "val_acc": 96.4 },
+    { "epoch": 30, "train_loss": 0.084, "val_loss": 0.150, "train_dice": 0.980, "val_dice": 0.948, "train_iou": 0.961, "val_iou": 0.902, "train_acc": 98.9, "val_acc": 96.4 }
+  ],
+  "model_comparisons": {
+    "unet": {
+      "name": "Standard U-Net",
+      "best_dice": 0.892,
+      "best_iou": 0.814,
+      "final_val_loss": 0.228,
+      "final_acc": 88.5,
+      "convergence_epoch": 20
+    },
+    "attention_unet": {
+      "name": "Attention U-Net",
+      "best_dice": 0.926,
+      "best_iou": 0.865,
+      "final_val_loss": 0.182,
+      "final_acc": 92.4,
+      "convergence_epoch": 22
+    },
+    "neurocord_resattn": {
+      "name": "NeuroCord-ResAttnNet (Proposed)",
+      "best_dice": 0.948,
+      "best_iou": 0.902,
+      "final_val_loss": 0.150,
+      "final_acc": 96.4,
+      "convergence_epoch": 26
+    }
+  }
+}

@@ -1,4 +1,4 @@
-"\"\"\"Utility functions: losses, metrics, visualisation helpers.\"\"\"
+"""Utility functions: losses, metrics, visualisation helpers."""
 from __future__ import annotations
 
 import os
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 # ----------------------------- Losses -----------------------------------
 class DiceLoss(nn.Module):
-    \"\"\"Soft-Dice loss for binary segmentation.\"\"\"
+    """Soft-Dice loss for binary segmentation."""
 
     def __init__(self, smooth: float = 1.0):
         super().__init__()
@@ -28,7 +28,7 @@ class DiceLoss(nn.Module):
 
 
 class CombinedLoss(nn.Module):
-    \"\"\"Dice (segmentation) + Categorical Cross-Entropy (classification).\"\"\"
+    """Dice (segmentation) + Categorical Cross-Entropy (classification)."""
 
     def __init__(self, seg_weight: float = 1.0, cls_weight: float = 1.0):
         super().__init__()
@@ -65,28 +65,49 @@ def classification_accuracy(logits: torch.Tensor, target: torch.Tensor) -> float
 
 # ----------------------------- Visualisation ----------------------------
 def visualise_prediction(image, gt_mask, pred_mask, pred_class, class_names, save_path=None):
-    \"\"\"Plot original / GT mask / predicted mask side-by-side.\"\"\"
+    """Plot original / GT mask / predicted mask side-by-side."""
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
-    axes[0].imshow(image.squeeze(), cmap=\"gray\"); axes[0].set_title(\"Original\"); axes[0].axis(\"off\")
-    axes[1].imshow(gt_mask.squeeze(), cmap=\"gray\"); axes[1].set_title(\"GT Mask\"); axes[1].axis(\"off\")
-    axes[2].imshow(pred_mask.squeeze(), cmap=\"gray\")
-    axes[2].set_title(f\"Pred Mask
-Class: {class_names[pred_class]}\"); axes[2].axis(\"off\")
+    axes[0].imshow(image.squeeze(), cmap="gray"); axes[0].set_title("Original"); axes[0].axis("off")
+    axes[1].imshow(gt_mask.squeeze(), cmap="gray"); axes[1].set_title("GT Mask"); axes[1].axis("off")
+    axes[2].imshow(pred_mask.squeeze(), cmap="gray")
+    axes[2].set_title(f"Pred Mask\\nClass: {class_names[pred_class]}"); axes[2].axis("off")
     plt.tight_layout()
     if save_path:
-        os.makedirs(os.path.dirname(save_path) or \".\", exist_ok=True)
+        os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
         plt.savefig(save_path, dpi=120)
     plt.close(fig)
 
 
-def plot_confusion_matrix(cm: np.ndarray, class_names, save_path: str = \"confusion_matrix.png\"):
-    fig, ax = plt.subplots(figsize=(5, 4))
-    im = ax.imshow(cm, cmap=\"Blues\")
-    ax.set_xticks(range(len(class_names))); ax.set_yticks(range(len(class_names)))
-    ax.set_xticklabels(class_names); ax.set_yticklabels(class_names)
+def plot_confusion_matrix(cm: np.ndarray, class_names, save_path: str = "confusion_matrix.png"):
+    fig, ax = plt.subplots(figsize=(6, 5))
+    
+    # Calculate row sums for percentages
+    row_sums = cm.sum(axis=1, keepdims=True)
+    row_sums[row_sums == 0] = 1 # avoid division by zero
+    cm_perc = cm / row_sums
+    
+    im = ax.imshow(cm_perc, cmap="Blues", vmin=0, vmax=1)
+    
+    ax.set_xticks(range(len(class_names)))
+    ax.set_yticks(range(len(class_names)))
+    ax.set_xticklabels(class_names, rotation=45, ha="right")
+    ax.set_yticklabels(class_names)
+    
+    # Add text annotations with count only
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            ax.text(j, i, int(cm[i, j]), ha=\"center\", va=\"center\", color=\"black\")
-    ax.set_xlabel(\"Predicted\"); ax.set_ylabel(\"Actual\"); ax.set_title(\"Confusion Matrix\")
-    fig.colorbar(im); plt.tight_layout(); plt.savefig(save_path, dpi=120); plt.close(fig)
-"
+            color = "white" if cm_perc[i, j] > 0.5 else "black"
+            text = f"{int(cm[i, j])}"
+            ax.text(j, i, text, ha="center", va="center", color=color, fontsize=11)
+            
+    ax.set_xlabel("Predicted Label", fontweight='bold')
+    ax.set_ylabel("Actual Label", fontweight='bold')
+    ax.set_title("Confusion Matrix", fontweight='bold', pad=15)
+    
+    # Add a colorbar for the percentages
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label('Recall (%)', rotation=270, labelpad=15)
+    
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    plt.close(fig)
