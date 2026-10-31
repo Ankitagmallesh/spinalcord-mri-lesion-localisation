@@ -6,3 +6,5 @@ opencv-python-headless
 numpy
 pydantic
 motor
+scikit-learn
+matplotlib

@@ -6,20 +6,24 @@
 # ------------------------------------------------------------------------------
 # Stage 1: Build Modern React Frontend
 # ------------------------------------------------------------------------------
-FROM node:20-alpine AS frontend-builder
+FROM node:20-bullseye-slim AS frontend-builder
 WORKDIR /build
 
-# Install dependencies with caching
-COPY app/app/frontend/package*.json app/app/frontend/yarn*.lock ./
+# Disable strict CI failure on ESLint warnings and optimize memory
+ENV CI=false
+ENV DISABLE_ESLINT_PLUGIN=true
+ENV GENERATE_SOURCEMAP=false
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV REACT_APP_BACKEND_URL=""
+
+# Install dependencies
+COPY app/app/frontend/package*.json ./
 RUN npm install --legacy-peer-deps --no-audit --no-fund
 
 # Copy frontend source code and configs
 COPY app/app/frontend/ ./
 
-# In single-container deployment, the frontend accesses the backend on the same host
-ENV REACT_APP_BACKEND_URL=""
-ENV GENERATE_SOURCEMAP=false
-
+# Build production bundle
 RUN npm run build
 
 # ------------------------------------------------------------------------------
@@ -39,12 +43,12 @@ WORKDIR /app
 # Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip
 
-# Install CPU PyTorch & TorchVision (optimized for cloud web services)
+# Install CPU PyTorch & TorchVision (optimized for lightweight cloud services)
 RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# Install backend dependencies
-COPY app/app/backend/requirements.txt /app/backend-requirements.txt
-RUN pip install --no-cache-dir -r /app/backend-requirements.txt
+# Install backend dependencies (FastAPI, OpenCV headless, Pydantic, etc.)
+COPY app/app/backend/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copy ML engine, models, and training dataset
 COPY app/app/ml /app/app/ml
@@ -57,12 +61,12 @@ COPY --from=frontend-builder /build/build /app/app/frontend/build
 
 WORKDIR /app/app/backend
 
-# Render / Railway / Cloud Run injects $PORT dynamically
+# Port support: 8000 (standard), 7860 (Hugging Face Spaces), 10000 (Render default)
 ENV PORT=8000
 ENV PYTHONUNBUFFERED=1
 ENV CORS_ORIGINS="*"
 
-EXPOSE 8000
+EXPOSE 8000 7860 10000
 
 # Run FastAPI backend via Uvicorn
-CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "python -m uvicorn server:app --host 0.0.0.0 --port ${PORT:-8000}"]

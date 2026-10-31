@@ -6,7 +6,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None
 
 
 # ----------------------------- Losses -----------------------------------
@@ -66,6 +69,8 @@ def classification_accuracy(logits: torch.Tensor, target: torch.Tensor) -> float
 # ----------------------------- Visualisation ----------------------------
 def visualise_prediction(image, gt_mask, pred_mask, pred_class, class_names, save_path=None):
     """Plot original / GT mask / predicted mask side-by-side."""
+    if plt is None:
+        return
     fig, axes = plt.subplots(1, 3, figsize=(12, 4))
     axes[0].imshow(image.squeeze(), cmap="gray"); axes[0].set_title("Original"); axes[0].axis("off")
     axes[1].imshow(gt_mask.squeeze(), cmap="gray"); axes[1].set_title("GT Mask"); axes[1].axis("off")
@@ -79,6 +84,8 @@ def visualise_prediction(image, gt_mask, pred_mask, pred_class, class_names, sav
 
 
 def plot_confusion_matrix(cm: np.ndarray, class_names, save_path: str = "confusion_matrix.png"):
+    if plt is None:
+        return
     fig, ax = plt.subplots(figsize=(6, 5))
     
     # Calculate row sums for percentages
